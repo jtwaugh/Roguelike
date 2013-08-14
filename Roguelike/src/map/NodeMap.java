@@ -452,7 +452,17 @@ public class NodeMap
 		currentNode = clicksOn(p);
 		
 		if (currentNode != null)
+		{
+			int x = (p.x < 0) ? 0 : p.x;
+			x = (x > (Game.WIDTH - windows.nodeWindows.get(currentNode).getWidth())) ? (Game.WIDTH - windows.nodeWindows.get(currentNode).getWidth()) : x;
+			
+			int y = (p.y < 0) ? 0 : p.y;
+			y = (y > (Game.HEIGHT - windows.nodeWindows.get(currentNode).getHeight())) ? (Game.HEIGHT - windows.nodeWindows.get(currentNode).getHeight()) : y;
+			
+			windows.nodeWindows.get(currentNode).setPosition(x, y);
 			windows.nodeWindows.get(currentNode).setOpened(true);
+		}
+			
 	}
 
 	private class WindowHandler
@@ -467,7 +477,7 @@ public class NodeMap
 			
 			for (Node n : nodes)
 			{
-				Window w = new MessageBox(150, 60, "nice", "Town of " + NameGen.getTownName(), n.getLoc(), Color.WHITE);
+				Window w = new MessageBox(150, 60, "nice", NameGen.getTownName(), n.getLoc(), Color.WHITE);
 				nodeWindows.put(n, w);
 			}
 		}

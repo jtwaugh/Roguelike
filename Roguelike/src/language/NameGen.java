@@ -2,8 +2,26 @@ package language;
 
 public class NameGen
 {
+	protected static String[] townTitle = 
+		{ 	
+			"Village of",
+			"Village of",
+			"Village of",
+			"Village of",
+			"Town of",
+			"Town of",
+			"Town of",
+			"Fort",
+			"Fort",
+			"Hamlet",
+			"Bad",
+			"Great",
+			"City of"
+		};
+	
 	protected static String[] townPrefix = 
-		{	"kings",
+		{
+			"kings",
 			"queens",
 			"new",
 			"liver",
@@ -12,20 +30,21 @@ public class NameGen
 			"war",
 			"nor",
 			"suf",
-			"christ",
+			"sus",
 			"shef",
-			"middles",
+			"middle",
 			"south",
 			"man",
 			"bed",
 			"wat",
 			"wor",
 			"shrews",
-			"wald"	};
+			"wald"	
+		};
 	
 	protected static String[] townSuffix = 
 		{
-			"ex",
+			"sex",
 			"wich",
 			"ing",
 			"wick", 
@@ -46,11 +65,12 @@ public class NameGen
 			"by",
 			"port",
 			"bridge",
-			"mouth"	};
+			"mouth"	
+		};
 	
 	public static String getTownName()
 	{
 		String s = townPrefix[(int)(Math.random() * townPrefix.length)] + townSuffix[(int)(Math.random() * townSuffix.length)];
-		return s.substring(0, 1).toUpperCase() + s.substring(1);
+		return townTitle[(int)(Math.random() * townTitle.length)] + " " + s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
 }

@@ -1,0 +1,5 @@
+package hero;
+
+public enum CombatSkill { Sword, Daggers, Staff, Bow, Crossbow };
+
+public enum CraftSkill { Blacksmithing, Alchemy, Woodworking, Tailoring, Cooking };

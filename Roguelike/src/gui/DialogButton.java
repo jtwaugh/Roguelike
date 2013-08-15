@@ -13,7 +13,6 @@ public class DialogButton extends FrameInterface
 {
 	private String text;
 	public Point pos;
-	private Point realPos;
 	public boolean clicked;
 	
 	public DialogButton(int _width, int _height, Point _pos, String frameName, String _text)

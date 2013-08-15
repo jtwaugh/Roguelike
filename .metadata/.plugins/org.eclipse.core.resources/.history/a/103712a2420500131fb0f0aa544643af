@@ -1,0 +1,12 @@
+package hero;
+
+public class Skill 
+{
+	protected int level;
+	protected float experience;
+	
+	public int expFor(int lvl)
+	{
+		return ((1 + lvl) * (1 + lvl)) + 3;
+	}
+}

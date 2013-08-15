@@ -2,8 +2,8 @@ package map;
 
 import game.Game;
 import gui.DialogBox;
-import gui.MessageBox;
 import gui.Window;
+import hero.Player;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -40,9 +40,12 @@ public class NodeMap
 	
 	protected WindowHandler windows;
 	
-	public NodeMap()
+	protected Player steve;
+	
+	public NodeMap(Player _steve)
 	{
 		// Initialize
+		steve = _steve;
 		nodes = new ArrayList<Node>();
 		connections = new ArrayList<Connection>();
 		ArrayList<Node> path = new ArrayList<Node>();
@@ -113,6 +116,8 @@ public class NodeMap
 		
 		System.out.println("Node types assigned.");
 
+		steve.mapSprite().setNode(currentNode);
+		
 		windows = new WindowHandler();
 }
 	
@@ -415,6 +420,8 @@ public class NodeMap
 			n.render(g);
 		}
 		
+		steve.mapRender(g);
+		
 		windows.drawWindows(g);
 	}
 
@@ -450,20 +457,23 @@ public class NodeMap
 	{
 		Point p = e.getPoint();
 		
-		currentNode = clicksOn(p);
+		Node n = clicksOn(p);
 		
-		if (currentNode != null)
+		if (n != null)
 		{
-			int x = (p.x < 0) ? 0 : p.x;
-			x = (x > (Game.WIDTH - windows.nodeWindows.get(currentNode).getWidth())) ? (Game.WIDTH - windows.nodeWindows.get(currentNode).getWidth()) : x;
-			
-			int y = (p.y < 0) ? 0 : p.y;
-			y = (y > (Game.HEIGHT - windows.nodeWindows.get(currentNode).getHeight())) ? (Game.HEIGHT - windows.nodeWindows.get(currentNode).getHeight()) : y;
-			
-			windows.nodeWindows.get(currentNode).setPosition(x, y);
-			windows.nodeWindows.get(currentNode).setOpened(true);
+			if (steve.mapSprite().getNode().getNodes().contains(n))
+			{
+				currentNode = n;
+				int x = (p.x < 0) ? 0 : p.x;
+				x = (x > (Game.WIDTH - windows.nodeWindows.get(currentNode).getWidth())) ? (Game.WIDTH - windows.nodeWindows.get(currentNode).getWidth()) : x;
+				
+				int y = (p.y < 0) ? 0 : p.y;
+				y = (y > (Game.HEIGHT - windows.nodeWindows.get(currentNode).getHeight())) ? (Game.HEIGHT - windows.nodeWindows.get(currentNode).getHeight()) : y;
+				
+				windows.nodeWindows.get(currentNode).setPosition(x, y);
+				windows.nodeWindows.get(currentNode).setOpened(true);	
+			}
 		}
-			
 	}
 
 	private class WindowHandler
@@ -562,7 +572,12 @@ public class NodeMap
 			windowQueue.clear();
 			for (Node n : nodeWindows.keySet())
 			{
-				if (nodeWindows.get(n).getOpened() && !nodeWindows.get(n).getClosed())
+				if (nodeWindows.get(n).getClosed())
+				{
+					steve.mapSprite().setNode(n);
+					nodeWindows.get(n).reset();
+				}
+				else if (nodeWindows.get(n).getOpened())
 				{
 					if (n != currentNode)
 					{
@@ -572,10 +587,6 @@ public class NodeMap
 					{
 						windowQueue.add(nodeWindows.get(n));
 					}
-				}
-				else
-				{
-					nodeWindows.get(n).reset();
 				}
 			}
 			

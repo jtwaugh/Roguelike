@@ -1,14 +1,10 @@
 package state;
 
-import gui.Window;
-
-import map.Node;
+import hero.Player;
 
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import map.NodeMap;
 
@@ -16,9 +12,9 @@ public class OverworldState extends GameState
 {
 	protected NodeMap map;
 	
-	public OverworldState()
+	public OverworldState(Player steve)
 	{
-		map = new NodeMap();
+		map = new NodeMap(steve);
 	}
 	
 	public void input() 

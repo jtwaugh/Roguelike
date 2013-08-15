@@ -1,13 +1,12 @@
 package game;
+import hero.Player;
 import io.ResourceManager;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.MouseInfo;
 import java.awt.Point;
-import java.awt.PointerInfo;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -26,6 +25,12 @@ import state.OverworldState;
 
 public class Game extends Canvas
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	
 	// Globals
 	public static final int WIDTH = 800;
 	public static final int HEIGHT = 600;
@@ -53,6 +58,8 @@ public class Game extends Canvas
 	private OverworldState overworld;
 	private GameState currentState; 
 	
+	private Player steve;
+	
 	public Game() throws IOException
 	{
 		// Set up the window
@@ -62,14 +69,16 @@ public class Game extends Canvas
 		addMouseListener(mih);
 		addMouseMotionListener(mih);
 
-
 		
 		// Set up the resources
 		RESOURCES = new ResourceManager();
 		RESOURCES.loadSprites();
 		
+		// Create the player
+		steve = new Player("Steve");
+		
 		// Instantiate the game states
-		overworld = new OverworldState();
+		overworld = new OverworldState(steve);
 		currentState = overworld;
 	}
 	
@@ -122,9 +131,6 @@ public class Game extends Canvas
 	public void gameLoop() throws IOException
 	{
 		
-		long lastLoopTime = System.currentTimeMillis();
-		long delta;
-		
 		while (gameRunning)
 		{	
 			// Call game logic
@@ -142,10 +148,6 @@ public class Game extends Canvas
 			// Display the frame
 			strategy.show();
 			
-			// Get time in frame
-			delta = System.currentTimeMillis() - lastLoopTime;
-			lastLoopTime = System.currentTimeMillis();
-			
 			// Sleep
 			try 
 			{ 
@@ -156,10 +158,7 @@ public class Game extends Canvas
 	}
 	
 	private class KeyInputHandler extends KeyAdapter 
-	{
-		
-		private int pressCount = 1;
-		
+	{		
 		public void keyPressed(KeyEvent e) 
 		{
 			if (waitingForKeyPress) 
@@ -211,14 +210,6 @@ public class Game extends Canvas
 			mousePos = e.getPoint();
 			currentState.mouseDragHandle(e);
 		}
-	}
-
-	private void getMouse()
-	{
-		PointerInfo a = MouseInfo.getPointerInfo();
-		Point b = a.getLocation();
-		mousePos.x = (int) b.getX() - getLocationOnScreen().x;
-		mousePos.y = (int) b.getY() - getLocationOnScreen().y;
 	}
 	
 	public static void main(String argv[]) throws IOException 

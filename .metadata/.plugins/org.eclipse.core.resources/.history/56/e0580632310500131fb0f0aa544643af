@@ -41,7 +41,7 @@ public class DialogBox extends MessageBox
 		
 		for (int q = 0; q < options.length; q++)
 		{
-			choices.add(new DialogButton(width - 20, 30, new Point(15, height - 40*(q+1)), choiceFrameName, options[q], c));
+			choices.add(new DialogButton(width - 20, 30, new Point(15, height - 20*(q+1)), choiceFrameName, options[q]));
 		}
 		
 		exitChoice = "";
@@ -89,8 +89,6 @@ public class DialogBox extends MessageBox
 	public void reset()
 	{
 		exitChoice = "";
-		close = false;
-		open = false;
 	}
 	
 	
@@ -102,8 +100,6 @@ public class DialogBox extends MessageBox
 	
 	public boolean mouseReleaseHandle(MouseEvent e)
 	{
-		pressed = false;
-		
 		if (open)
 		{
 			for (DialogButton o : choices)
@@ -113,15 +109,7 @@ public class DialogBox extends MessageBox
 					return true;
 				}
 			}
-			
-			if (open && !close && (e.getX() >= pos.x && e.getX() <= pos.x + width && e.getY() >= pos.y && e.getY() <= pos.y + height))
-				return true;
-			
-			return false;
 		}
-		
-		
-		
 		return false;
 	}
 }

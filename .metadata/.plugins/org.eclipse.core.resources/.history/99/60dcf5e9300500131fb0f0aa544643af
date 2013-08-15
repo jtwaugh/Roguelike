@@ -1,7 +1,6 @@
 package map;
 
 import game.Game;
-import gui.DialogBox;
 import gui.MessageBox;
 import gui.Window;
 
@@ -478,7 +477,7 @@ public class NodeMap
 			
 			for (Node n : nodes)
 			{
-				Window w = new DialogBox(150, 160, "nice", "nice", NameGen.getTownName(), n.getLoc(), new String[] {"Visit", "lolno"}, Color.WHITE);
+				Window w = new DialogBox(150, 60, "nice", "nice", NameGen.getTownName(), n.getLoc(), new String[] {"Visit", "lolno"}, Color.WHITE);
 				nodeWindows.put(n, w);
 			}
 		}

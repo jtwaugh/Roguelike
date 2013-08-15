@@ -583,7 +583,7 @@ public class NodeMap
 			{
 				windowQueue.get(q).update();
 				
-				if (windowQueue.get(q).getClosed())
+				if (windowQueue.get(q).getClosed() && !windowQueue.get(q).getOpened())
 				{
 					windowQueue.remove(q);
 					q--;

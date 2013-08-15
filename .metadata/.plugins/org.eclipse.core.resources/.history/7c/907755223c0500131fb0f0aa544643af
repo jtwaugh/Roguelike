@@ -69,7 +69,7 @@ public class DialogButton extends FrameInterface
 		if ((pos.x + parentPos.x <= Game.mousePos.x) && (Game.mousePos.x <= parentPos.x + pos.x + width) && (pos.y + parentPos.y <= Game.mousePos.y) && (Game.mousePos.y <= parentPos.y + pos.y + height))
 		{
 			clicked = true;
-			System.out.println(text + " button pressed.");
+			//System.out.println(text + " button pressed.");
 			return true;
 		}
 		else

@@ -89,3 +89,6 @@ This warning can be switched off on the Team > Git > Confirmations and Warnings 
 
 !ENTRY org.eclipse.m2e.logback.appender 4 0 2013-08-14 14:53:00.500
 !MESSAGE Failed to open search index.
+
+!ENTRY org.eclipse.ui 4 4 2013-08-14 16:55:17.655
+!MESSAGE Referenced part does not exist yet: org.eclipse.ui.views.ProblemView.

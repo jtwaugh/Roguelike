@@ -89,8 +89,6 @@ public class DialogBox extends MessageBox
 	public void reset()
 	{
 		exitChoice = "";
-		close = false;
-		open = false;
 	}
 	
 	

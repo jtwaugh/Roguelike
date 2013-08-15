@@ -21,25 +21,16 @@ public class DialogButton extends FrameInterface
 		super(_width, _height, frameName);
 		pos = _pos;
 		clicked = false;
-		createText(_text, Color.BLACK);
+		createText(_text);
 		text = _text;
 	}
 	
-	public DialogButton(int _width, int _height, Point _pos, String frameName, String _text, Color c)
-	{
-		super(_width, _height, frameName);
-		pos = _pos;
-		clicked = false;
-		createText(_text, c);
-		text = _text;
-	}
-	
-	private void createText(String txt, Color c)
+	private void createText(String txt)
 	{
 		BufferedImage text = new BufferedImage(width - 20, 16, BufferedImage.TYPE_INT_ARGB);
 		
 		Graphics2D t = (Graphics2D) text.getGraphics();
-		t.setColor(c);
+		t.setColor(new Color(0, 0, 0));
 		t.setFont(Game.FONT_TEXT);
 		t.drawString(txt, 0, t.getFontMetrics().getAscent());
 		t.dispose();
@@ -69,7 +60,7 @@ public class DialogButton extends FrameInterface
 		if ((pos.x + parentPos.x <= Game.mousePos.x) && (Game.mousePos.x <= parentPos.x + pos.x + width) && (pos.y + parentPos.y <= Game.mousePos.y) && (Game.mousePos.y <= parentPos.y + pos.y + height))
 		{
 			clicked = true;
-			System.out.println(text + " button pressed.");
+			//System.out.println(text + " button pressed.");
 			return true;
 		}
 		else

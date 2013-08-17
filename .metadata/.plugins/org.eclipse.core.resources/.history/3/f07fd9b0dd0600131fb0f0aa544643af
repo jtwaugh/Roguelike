@@ -1,0 +1,9 @@
+package map;
+
+public class Dungeon
+{
+	// Parameters
+	
+	public static final int ROOM_DIM_MIN = 4;
+	public static final int ROOM_DIM_MAX = 9;
+}

@@ -30,6 +30,7 @@ public class NodeMap
 	
 	public static final int MAX_NODES = 20;
 	
+	
 	// Members
 	
 	protected ArrayList<Node> nodes;
@@ -46,345 +47,14 @@ public class NodeMap
 	{
 		// Initialize
 		steve = _steve;
-		nodes = new ArrayList<Node>();
-		connections = new ArrayList<Connection>();
-		ArrayList<Node> path = new ArrayList<Node>();
-		
-		// Generate a path from start to end, add extraneous nodes
-		
-		// Create the diametrically opposing terminal nodes
-		startNode = createTerminalNode();
-		endNode = new Node(Game.WIDTH - startNode.getLoc().x, Game.HEIGHT - startNode.getLoc().y);
-		path.add(startNode);
-		
-		// Create a path between them
-		currentNode = startNode;
-		Point p = startNode.getLoc();
-		Point q = endNode.getLoc();
-		
-		
-		// Create the initial path
-		
-		while (Point.distance(p.x, p.y, q.x, q.y) > MAX_NODE_DIST)
-		// While the current point is out of range of the end node
-		{
-			// Get a new node and add it
-			Node n = createPath(p, q, path);
-			path.add(n);
-			
-			// Move on
-			currentNode = n;
-			p = currentNode.getLoc();
-		}
-		
-		path.add(endNode);
-	
-		System.out.println("Path created.");
-		
-		
-		// Add path nodes to the set of all nodes
-		addNodes(path);
-		
-		System.out.println("Nodes added.");
-	
-		
-		// Draw new paths to the original until we have enough nodes
-		int killswitch = 0;
-		while (nodes.size() < MAX_NODES)
-		{
-			integrateNode(path, p);
-			killswitch++;
-			if (killswitch > 1000)
-			{
-				System.out.println("Integration loop broken.");
-				break;
-			}
-		}
-		
-		System.out.println("Integration loop completed.");
-		
-		currentNode = nodes.get(0);
-		
-		// Connect all nodes
-		connectNodes();
-		
-		System.out.println("Nodes connected.");
-		
-		
-		// Assign node types
-		assignNodeTypes();
-		
-		System.out.println("Node types assigned.");
 
+		PathCreator p = new PathCreator();
+		p.create();
+		
 		steve.mapSprite().setNode(currentNode);
 		
 		windows = new WindowHandler();
-}
-	
-	private void addNodes(ArrayList<Node> path)
-	{
-		for (int w = 0; w < path.size(); w++)
-		{
-			if (w > 0)
-			{
-				Connection c = new Connection(path.get(w), path.get(w-1));
-				if (!handleIntersection(c))
-				{
-					connections.add(c);
-				}
-			}
-			if (!nodes.contains(path.get(w)))
-				nodes.add(path.get(w));
-		}
-	}
-	
-	private void assignNodeTypes()
-	{
-		for (Node n : nodes)
-		{
-			int l = (int)(Math.random() * 10);
-			if (l == 0)
-			{
-				n.setType(NodeType.Dungeon);
-			}
-			else
-			{
-				n.setType(NodeType.Town);
-			}
-		}
-	}
-	
-	private void connectNodes()
-	{
-		for (Connection c : connections)
-		{
-			c.a.addNode(c.b);
-			c.a.addConnection(c);
-			c.b.addNode(c.a);
-			c.b.addConnection(c);
-		}
-	}
-	
-	private Node createPath(Point p, Point q, ArrayList<Node> path)
-	{
-		float theta = (float) Math.atan2(q.y - p.y, q.x - p.x);
-		
-		int x = -9001;
-		int y = -9001;
-		
-		ArrayList<Node> nodez = nodes;
-		nodez.remove(endNode);
-		
-		do
-		{
-			Point a = wander(x, y, theta, p);
-			x = a.x;
-			y = a.y;
-		}
-		while (Point.distance(x, y, q.x, q.y) < MIN_NODE_DIST || intersects(path, x, y) != null || intersects(nodez, x, y) != null || (x <= 0) || (x >= Game.WIDTH) || (y <= 0 ) || (y >= Game.HEIGHT));
-		
-		// Create the node, add it to the path
-		return new Node(x, y);
-	}
-	
-	private Point wander(int x, int y, float theta, Point p)
-	{
-		// Find a random distance and angular offset
-		float r = Util.Int(MIN_NODE_DIST, MAX_NODE_DIST);
-		float t = Util.Float(theta - ANGLE_OFFSET, theta + ANGLE_OFFSET);
-		
-		// Create the point
-		x = p.x + (int)(r * Math.cos(t));
-		y = p.y + (int)(r * Math.sin(t));
-		
-		return new Point(x, y);
-	}
-		
-	private void integrateNode(ArrayList<Node> path, Point p)
-	{
-		path = new ArrayList<Node>();
-		
-		do
-		{
-			startNode = createTerminalNode();
-		}
-		while (intersects(nodes, startNode.getLoc().x, startNode.getLoc().y) != null);
-		
-		currentNode = startNode;
-		p = startNode.getLoc();
-		
-		while (isolated(nodes, p.x, p.y) == null)
-		// While the current point is out of range of any other node
-		{
-			Node n = generateNode(path, p);
-			path.add(n);
-			currentNode = n;
-			p = currentNode.getLoc();
-		}
-		System.out.println("Generation loop completed.");
-		
-		path.add(isolated(nodes, p.x, p.y));
-		
-		// Add path nodes to the set of all nodes
-		addNodes(path);
-	}
-	
-	private Node generateNode(ArrayList<Node> path, Point p)
-	{
-		int x, y;
-		int i = 0;
-		do
-		{
-			i++;
-			
-			if (i > 1000)
-			{
-				System.out.println("Broken loop");
-			}
-				
-			// Find a random distance and angular offset
-			float r = Util.Int(MIN_NODE_DIST, MAX_NODE_DIST);
-			float t = (float)(Math.random() * 2 * Math.PI);
-			
-			// Create the point
-			x = p.x + (int)(r * Math.cos(t));
-			y = p.y + (int)(r * Math.sin(t));
-		}
-		while (intersects(path, x, y) != null || intersects(nodes, x, y) != null || (x <= MIN_NODE_DIST) || (x >= Game.WIDTH - MIN_NODE_DIST) || (y <= MIN_NODE_DIST) || (y >= Game.HEIGHT - MIN_NODE_DIST));
-		
-		System.out.println("Node generated.");
-		
-		// Create the node, add it to the path
-		return new Node(x, y);
-	}
-	
-	public Node createTerminalNode()
-	// Within range of the exterior
-	{	
-		int w = (int)(Math.random() * 4);
-		
-		int x = -9001;
-		int y = -9001;
-		
-		switch (w)
-		{
-			case (0):
-			{
-				// North
-				x = (int)(Math.random() * Game.WIDTH);
-				y = Game.HEIGHT - Util.Int(MIN_TERMINAL_DIST, MAX_TERMINAL_DIST);
-				break;
-			}
-			
-			case (1):
-			{
-				// East
-				x = Game.WIDTH - Util.Int(MIN_TERMINAL_DIST, MAX_TERMINAL_DIST);
-				y = (int)(Math.random() * Game.HEIGHT);
-				break;
-			}
-			
-			case (2):
-			{
-				// South
-				x = (int)(Math.random() * Game.WIDTH);
-				y = Util.Int(MIN_TERMINAL_DIST, MAX_TERMINAL_DIST);
-				break;
-			}
-			
-			case (3):
-			{
-				// West
-				x = Util.Int(MIN_TERMINAL_DIST, MAX_TERMINAL_DIST);
-				y = (int)(Math.random() * Game.HEIGHT);
-				break;
-			}
-		}
-		
-		return new Node(x, y);
-	}
-
-	public Node intersects(ArrayList<Node> nodes, int x, int y)
-	{
-		for (Node n : nodes)
-		{
-			if (Point.distance(x, y, n.getLoc().x, n.getLoc().y) < MIN_NODE_DIST) return n;
-		}
-		
-		return null;
-	}
-	
-	public Node clicksOn(Point p)
-	{
-		for (Node n : nodes)
-		{
-			int r = (int)Math.sqrt(n.getSprite().getWidth() * n.getSprite().getWidth() + n.getSprite().getHeight() * n.getSprite().getHeight());
-			if (Point.distance(p.x, p.y, n.getLoc().x, n.getLoc().y) < r) return n;
-		}
-		
-		return null;
-	}
-
-	public Node isolated(ArrayList<Node> nodes, int x, int y)
-	{
-		for (Node n : nodes)
-		{
-			if (Point.distance(x, y, n.getLoc().x, n.getLoc().y) < MAX_NODE_DIST) return n;
-		}
-		
-		return null;
-	}
-	
-	public boolean handleIntersection(Connection c)
-	{
-		boolean ret = false;
-		
-		ArrayList<Connection> delete = new ArrayList<Connection>();
-		
-		for (int w = 0; w < connections.size(); w++)
-		{
-			Connection d = connections.get(w);
-			
-			if (!shareNodes(c, d) && c.toLine().intersectsLine(d.toLine()))
-			{
-				delete.add(d);
-				if (distanceBetween(c.a, d.a) < MAX_NODE_DIST)
-				{
-					connections.add(new Connection(c.a, d.a));
-				}
-				if (distanceBetween(c.a, d.b) < MAX_NODE_DIST)
-				{
-					connections.add(new Connection(c.a, d.b));
-				}
-				if (distanceBetween(c.b, d.a) < MAX_NODE_DIST)
-				{
-					connections.add(new Connection(c.b, d.a));
-				}
-				if (distanceBetween(c.b, d.b) < MAX_NODE_DIST)
-				{
-					connections.add(new Connection(c.b, d.b));
-				}
-				ret = true;
-			}
-		}
-		
-		for (Connection w : delete)
-		{
-			connections.remove(w);
-		}
-		
-		return ret;
-	}
-	
-	public float distanceBetween(Node a, Node b)
-	{
-		return (float) Point.distance(a.getLoc().x, a.getLoc().y, b.getLoc().x, b.getLoc().y);
-	}
-	
-	public boolean shareNodes(Connection a, Connection b)
-	{
-		return (a.a == b.a || a.a == b.b || a.b == b.a || a.b == b.b);
-	}
+}	
 	
 	public void logic()
 	{
@@ -414,9 +84,6 @@ public class NodeMap
 		
 		for (Node n : nodes)
 		{
-			//g.setColor(new Color(255, 255, 200, 16));
-			//g.fillOval(n.getLoc().x-MAX_NODE_DIST, n.getLoc().y-MAX_NODE_DIST, 2 * MAX_NODE_DIST, 2 * MAX_NODE_DIST);
-			//g.fillOval(n.getLoc().x-MIN_NODE_DIST, n.getLoc().y-MIN_NODE_DIST, 2 * MIN_NODE_DIST, 2 * MIN_NODE_DIST);
 			n.render(g);
 		}
 		
@@ -451,6 +118,17 @@ public class NodeMap
 	public void keyReleaseHandle(KeyEvent e)
 	{
 		windows.keyReleaseHandle(e);
+	}
+	
+	public Node clicksOn(Point p)
+	{
+		for (Node n : nodes)
+		{
+			int r = (int)Math.sqrt(n.getSprite().getWidth() * n.getSprite().getWidth() + n.getSprite().getHeight() * n.getSprite().getHeight());
+			if (Point.distance(p.x, p.y, n.getLoc().x, n.getLoc().y) < r) return n;
+		}
+		
+		return null;
 	}
 	
 	private void clickOnNodes(MouseEvent e)
@@ -488,7 +166,7 @@ public class NodeMap
 			
 			for (Node n : nodes)
 			{
-				Window w = new DialogBox(150, 160, "nice", "nice", NameGen.getTownName(), n.getLoc(), new String[] {"Visit", "lolno"}, Color.WHITE);
+				Window w = new DialogBox(150, 160, "nice", "nice", NameGen.getTownName(), n.getLoc(), new String[] {"lolno", "Visit"}, Color.WHITE);
 				nodeWindows.put(n, w);
 			}
 		}
@@ -570,36 +248,379 @@ public class NodeMap
 		public void updateInterface()
 		{
 			windowQueue.clear();
+			
+			Window w;
+			
 			for (Node n : nodeWindows.keySet())
 			{
-				if (nodeWindows.get(n).getClosed())
+				w = nodeWindows.get(n);
+				if (w.getClosed())
 				{
-					steve.mapSprite().setNode(n);
-					nodeWindows.get(n).reset();
-				}
-				else if (nodeWindows.get(n).getOpened())
-				{
-					if (n != currentNode)
+					if (w.getExitChoice().equals("Visit"))
 					{
-						nodeWindows.get(n).reset();
+						steve.mapSprite().setNode(n);
 					}
 					else
 					{
-						windowQueue.add(nodeWindows.get(n));
+						currentNode = steve.mapSprite().getNode();
+					}
+					
+					w.reset();
+				}
+				else if (w.getOpened())
+				{
+					if (n != currentNode)
+					{
+						w.reset();
+					}
+					else
+					{
+						windowQueue.add(w);
 					}
 				}
 			}
 			
 			for (int q = 0; q < windowQueue.size(); q++)
 			{
-				windowQueue.get(q).update();
+				w = windowQueue.get(q);
+				w.update();
 				
-				if (windowQueue.get(q).getClosed())
+				if (w.getClosed())
 				{
 					windowQueue.remove(q);
 					q--;
 				}
 			}
+		}
+	}
+
+	private class PathCreator
+	{
+		private void create()
+		{
+			nodes = new ArrayList<Node>();
+			connections = new ArrayList<Connection>();
+			ArrayList<Node> path = new ArrayList<Node>();
+			
+			// Generate a path from start to end, add extraneous nodes
+			
+			// Create the diametrically opposing terminal nodes
+			startNode = createTerminalNode();
+			endNode = new Node(Game.WIDTH - startNode.getLoc().x, Game.HEIGHT - startNode.getLoc().y);
+			path.add(startNode);
+			
+			// Create a path between them
+			currentNode = startNode;
+			Point p = startNode.getLoc();
+			Point q = endNode.getLoc();
+			
+			
+			// Create the initial path
+			
+			while (Point.distance(p.x, p.y, q.x, q.y) > MAX_NODE_DIST)
+			// While the current point is out of range of the end node
+			{
+				// Get a new node and add it
+				Node n = createPath(p, q, path);
+				path.add(n);
+				
+				// Move on
+				currentNode = n;
+				p = currentNode.getLoc();
+			}
+			
+			path.add(endNode);
+		
+			System.out.println("Path created.");
+			
+			
+			// Add path nodes to the set of all nodes
+			addNodes(path);
+			
+			System.out.println("Nodes added.");
+		
+			
+			// Draw new paths to the original until we have enough nodes
+			int killswitch = 0;
+			while (nodes.size() < MAX_NODES)
+			{
+				integrateNode(path, p);
+				killswitch++;
+				if (killswitch > 1000)
+				{
+					System.out.println("Integration loop broken.");
+					break;
+				}
+			}
+			
+			System.out.println("Integration loop completed.");
+			
+			currentNode = nodes.get(0);
+			
+			// Connect all nodes
+			connectNodes();
+			
+			System.out.println("Nodes connected.");
+			
+			
+			// Assign node types
+			assignNodeTypes();
+			
+			System.out.println("Node types assigned.");
+		}
+	
+		private void addNodes(ArrayList<Node> path)
+		{
+			for (int w = 0; w < path.size(); w++)
+			{
+				if (w > 0)
+				{
+					Connection c = new Connection(path.get(w), path.get(w-1));
+					if (!handleIntersection(c))
+					{
+						connections.add(c);
+					}
+				}
+				if (!nodes.contains(path.get(w)))
+					nodes.add(path.get(w));
+			}
+		}
+		
+		private void assignNodeTypes()
+		{
+			for (Node n : nodes)
+			{
+				int l = (int)(Math.random() * 10);
+				if (l == 0)
+				{
+					n.setType(NodeType.Dungeon);
+				}
+				else
+				{
+					n.setType(NodeType.Town);
+				}
+			}
+		}
+		
+		private void connectNodes()
+		{
+			for (Connection c : connections)
+			{
+				c.a.addNode(c.b);
+				c.a.addConnection(c);
+				c.b.addNode(c.a);
+				c.b.addConnection(c);
+			}
+		}
+		
+		private Node createPath(Point p, Point q, ArrayList<Node> path)
+		{
+			float theta = (float) Math.atan2(q.y - p.y, q.x - p.x);
+			
+			int x = -9001;
+			int y = -9001;
+			
+			ArrayList<Node> nodez = nodes;
+			nodez.remove(endNode);
+			
+			do
+			{
+				Point a = wander(x, y, theta, p);
+				x = a.x;
+				y = a.y;
+			}
+			while (Point.distance(x, y, q.x, q.y) < MIN_NODE_DIST || intersects(path, x, y) != null || intersects(nodez, x, y) != null || (x <= 0) || (x >= Game.WIDTH) || (y <= 0 ) || (y >= Game.HEIGHT));
+			
+			// Create the node, add it to the path
+			return new Node(x, y);
+		}
+		
+		private Point wander(int x, int y, float theta, Point p)
+		{
+			// Find a random distance and angular offset
+			float r = Util.Int(MIN_NODE_DIST, MAX_NODE_DIST);
+			float t = Util.Float(theta - ANGLE_OFFSET, theta + ANGLE_OFFSET);
+			
+			// Create the point
+			x = p.x + (int)(r * Math.cos(t));
+			y = p.y + (int)(r * Math.sin(t));
+			
+			return new Point(x, y);
+		}
+			
+		private void integrateNode(ArrayList<Node> path, Point p)
+		{
+			path = new ArrayList<Node>();
+			
+			do
+			{
+				startNode = createTerminalNode();
+			}
+			while (intersects(nodes, startNode.getLoc().x, startNode.getLoc().y) != null);
+			
+			currentNode = startNode;
+			p = startNode.getLoc();
+			
+			while (isolated(nodes, p.x, p.y) == null)
+			// While the current point is out of range of any other node
+			{
+				Node n = generateNode(path, p);
+				path.add(n);
+				currentNode = n;
+				p = currentNode.getLoc();
+			}
+			System.out.println("Generation loop completed.");
+			
+			path.add(isolated(nodes, p.x, p.y));
+			
+			// Add path nodes to the set of all nodes
+			addNodes(path);
+		}
+		
+		private Node generateNode(ArrayList<Node> path, Point p)
+		{
+			int x, y;
+			int i = 0;
+			do
+			{
+				i++;
+				
+				if (i > 1000)
+				{
+					System.out.println("Broken loop");
+				}
+					
+				// Find a random distance and angular offset
+				float r = Util.Int(MIN_NODE_DIST, MAX_NODE_DIST);
+				float t = (float)(Math.random() * 2 * Math.PI);
+				
+				// Create the point
+				x = p.x + (int)(r * Math.cos(t));
+				y = p.y + (int)(r * Math.sin(t));
+			}
+			while (intersects(path, x, y) != null || intersects(nodes, x, y) != null || (x <= MIN_NODE_DIST) || (x >= Game.WIDTH - MIN_NODE_DIST) || (y <= MIN_NODE_DIST) || (y >= Game.HEIGHT - MIN_NODE_DIST));
+			
+			System.out.println("Node generated.");
+			
+			// Create the node, add it to the path
+			return new Node(x, y);
+		}
+		
+		public Node createTerminalNode()
+		// Within range of the exterior
+		{	
+			int w = (int)(Math.random() * 4);
+			
+			int x = -9001;
+			int y = -9001;
+			
+			switch (w)
+			{
+				case (0):
+				{
+					// North
+					x = (int)(Math.random() * Game.WIDTH);
+					y = Game.HEIGHT - Util.Int(MIN_TERMINAL_DIST, MAX_TERMINAL_DIST);
+					break;
+				}
+				
+				case (1):
+				{
+					// East
+					x = Game.WIDTH - Util.Int(MIN_TERMINAL_DIST, MAX_TERMINAL_DIST);
+					y = (int)(Math.random() * Game.HEIGHT);
+					break;
+				}
+				
+				case (2):
+				{
+					// South
+					x = (int)(Math.random() * Game.WIDTH);
+					y = Util.Int(MIN_TERMINAL_DIST, MAX_TERMINAL_DIST);
+					break;
+				}
+				
+				case (3):
+				{
+					// West
+					x = Util.Int(MIN_TERMINAL_DIST, MAX_TERMINAL_DIST);
+					y = (int)(Math.random() * Game.HEIGHT);
+					break;
+				}
+			}
+			
+			return new Node(x, y);
+		}
+
+		public Node intersects(ArrayList<Node> nodes, int x, int y)
+		{
+			for (Node n : nodes)
+			{
+				if (Point.distance(x, y, n.getLoc().x, n.getLoc().y) < MIN_NODE_DIST) return n;
+			}
+			
+			return null;
+		}
+
+		public Node isolated(ArrayList<Node> nodes, int x, int y)
+		{
+			for (Node n : nodes)
+			{
+				if (Point.distance(x, y, n.getLoc().x, n.getLoc().y) < MAX_NODE_DIST) return n;
+			}
+			
+			return null;
+		}
+		
+		public boolean handleIntersection(Connection c)
+		{
+			boolean ret = false;
+			
+			ArrayList<Connection> delete = new ArrayList<Connection>();
+			
+			for (int w = 0; w < connections.size(); w++)
+			{
+				Connection d = connections.get(w);
+				
+				if (!shareNodes(c, d) && c.toLine().intersectsLine(d.toLine()))
+				{
+					delete.add(d);
+					if (distanceBetween(c.a, d.a) < MAX_NODE_DIST)
+					{
+						connections.add(new Connection(c.a, d.a));
+					}
+					if (distanceBetween(c.a, d.b) < MAX_NODE_DIST)
+					{
+						connections.add(new Connection(c.a, d.b));
+					}
+					if (distanceBetween(c.b, d.a) < MAX_NODE_DIST)
+					{
+						connections.add(new Connection(c.b, d.a));
+					}
+					if (distanceBetween(c.b, d.b) < MAX_NODE_DIST)
+					{
+						connections.add(new Connection(c.b, d.b));
+					}
+					ret = true;
+				}
+			}
+			
+			for (Connection w : delete)
+			{
+				connections.remove(w);
+			}
+			
+			return ret;
+		}
+		
+		public float distanceBetween(Node a, Node b)
+		{
+			return (float) Point.distance(a.getLoc().x, a.getLoc().y, b.getLoc().x, b.getLoc().y);
+		}
+		
+		public boolean shareNodes(Connection a, Connection b)
+		{
+			return (a.a == b.a || a.a == b.b || a.b == b.a || a.b == b.b);
 		}
 	}
 }

@@ -1,0 +1,27 @@
+package math;
+
+public class DiscreteRandom {
+
+    private final double[] probDist;
+
+    public DiscreteRandom(double... probs) {
+        this.probDist = makeDistribution(probs);
+    }
+
+    private double[] makeDistribution(double[] probs) {
+        double[] distribution = new double[probs.length];
+        double sum = 0;
+        for (int i = 0; i < probs.length; i++) {
+            sum += probs[i];
+            distribution[i] = sum;
+        }
+        return distribution;
+    }
+
+    public int nextInt() {
+        double rand = Math.random();
+        int i = 0;
+        while (rand > probDist[i]) i++;
+        return i;
+    }
+}

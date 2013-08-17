@@ -1,0 +1,21 @@
+package map;
+
+public class Dungeon
+{
+	// Parameters
+	
+	public static final int NUM_CELLS = 150;
+	public static final int ROOM_DIM_MIN = 4;
+	public static final int ROOM_DIM_MAX = 9;
+	
+	
+	public Dungeon()
+	{
+		
+	}
+	
+	private void generate()
+	{
+		
+	}
+}

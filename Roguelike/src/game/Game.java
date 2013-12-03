@@ -214,8 +214,12 @@ public class Game extends Canvas
 	
 	public static void main(String argv[]) throws IOException 
 	{
+		UnitTest t = new UnitTest();
+		t.run();
+		
 		Game g = new Game();
-
+		
 		g.gameLoop();
+		
 	}
 }

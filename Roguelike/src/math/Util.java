@@ -14,8 +14,8 @@ public class Util
 		return (float)(a + (Math.random() * (b - a)));
 	}
 	
-	public static int gaussian(int a, int b)
+	public static int gaussian(int a, int b, Random ayn)
 	{
-		return (int)(a + (Math.abs(new Random().nextGaussian()) * (b - a)));
+		return (int)(a + (Math.abs(ayn.nextGaussian()) * (b - a)));
 	}
 }

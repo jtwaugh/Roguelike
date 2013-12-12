@@ -27,13 +27,16 @@ public class Dungeon
 {
 	// Parameters
 	
-	public static final int NUM_CELLS = 150;
+	public static final int NUM_CELLS = 250;
 	public static final int ROOM_DIM_MIN = 3;
 	public static final int ROOM_DIM_MAX = 6;
 	public static final int ROOM_RADIUS = 5;
 	
 	public ArrayList<Rectangle> rooms;
 	protected Point bounds;
+	
+	protected float centerX;
+	protected float centerY;
 	
 	protected ArrayList<Line2D> graph;
 	
@@ -69,7 +72,7 @@ public class Dungeon
 		graph = new ArrayList<Line2D>();
 		for (Rectangle r : rooms)
 		{
-			pts.add(new Point2D.Float(r.x + r.width / 2, r.y + r.height / 2));
+			pts.add(new Point2D.Float(r.x + (float)r.width / 2, r.y + (float)r.height / 2));
 		}
 		
 		Collections.sort(pts, new PointCompare());
@@ -95,8 +98,8 @@ public class Dungeon
 		else
 		{
 			int splitPt = (int)(size / 2);
-			List<Point2D.Float> left = pts.subList(0, splitPt - 1);
-			List<Point2D.Float> right = pts.subList(splitPt, pts.size() - 1);
+			List<Point2D.Float> left = pts.subList(0, splitPt);
+			List<Point2D.Float> right = pts.subList(splitPt, pts.size());
 			delaunay(left);
 			delaunay(right);
 			
@@ -255,6 +258,8 @@ public class Dungeon
 				
 				// Set the created edge as the base, add it to the graph
 				graph.add(new Line2D.Float(bot[0].x, bot[0].y, bot[1].x, bot[1].y));
+				
+				
 				
 				// Do this with the right and left sides until neither produces a candidate
 			}
@@ -415,14 +420,10 @@ public class Dungeon
 		// While there are collisions
 		while (collisionsExist())
 		{
-			tries++;
-			if (tries > 400)
-			{
-				rooms = new ArrayList<Rectangle>();
-				generateRooms();
-				tries = 0;
-			}
+			
 			Graphics2D g = (Graphics2D) strategy.getDrawGraphics();
+			
+			center();
 			
 			// Try to resolve collisions
 			driftIterate(velocity);
@@ -457,19 +458,24 @@ public class Dungeon
 	
 	public void driftIterate(HashMap<Rectangle, Point> velocity)
 	// Flock the rectangles apart until none of them touch
-	// TODO: use the triangular matrix
 	{
 		ArrayList<Rectangle> doomed = new ArrayList<Rectangle>();
+		HashMap<Rectangle, ArrayList<Float>> vectors = new HashMap<Rectangle, ArrayList<Float>>();
 		
-		// For each rectangle
 		for (Rectangle r : rooms)
 		{
-			ArrayList<Float> vectors = new ArrayList<Float>();
+			vectors.put(r, new ArrayList<Float>());
+		}
+		
+		// For each rectangle
+		for (int ir = 0; ir < rooms.size(); ir++)
+		{
+			Rectangle r = rooms.get(ir);
 			
 			// For each other rectangle, if the two collide...
-			for (Rectangle s : rooms)
+			for (int is = 0; is < ir; is++)
 			{
-				
+				Rectangle s = rooms.get(is);
 				
 				if (r.intersects(s) && r != s)
 				{
@@ -481,19 +487,27 @@ public class Dungeon
 					{
 						// Get the distance it must travel toward the closest edge of the collider
 						Point2D.Float d = driftVector(r, s);
-						System.out.println(d.x + ", " + d.y);
-						vectors.add(d);
+						vectors.get(r).add(d);
+						vectors.get(s).add(new Float(d.x * -1, d.y * -1));
 					}
 				}	
 			}
+		}
 			
+		for (Rectangle r : doomed)
+		{
+			rooms.remove(r);
+		}
+		
+		for (Rectangle r : rooms)
+		{
 			// Average all the velocities
-			if (vectors.size() > 0)
+			if (vectors.get(r).size() > 0)
 			{
 				int x = 0;
 				int y = 0;
 				
-				for (Float f : vectors)
+				for (Float f : vectors.get(r))
 				{
 					x += f.x;
 					y += f.y;
@@ -505,11 +519,6 @@ public class Dungeon
 				Point p = new Point((int)x, (int)y);
 				velocity.put(r, p);
 			}
-		}
-			
-		for (Rectangle r : doomed)
-		{
-			rooms.remove(r);
 		}
 	
 		// For each rectangle
@@ -542,6 +551,11 @@ public class Dungeon
 		{
 			g.drawLine(x, 0, x, UnitTest.HEIGHT);
 		}
+		
+		g.setColor(Color.WHITE);
+		
+		g.drawLine(UnitTest.WIDTH/2 + (int)(centerX * 10), 0, UnitTest.WIDTH/2 + (int)(centerX * 10), UnitTest.HEIGHT);
+		g.drawLine(0, UnitTest.HEIGHT/2 + (int)(centerY * 10), UnitTest.WIDTH, UnitTest.HEIGHT/2 + (int)(centerY * 10));
 	}
 	
 	private Point2D.Float driftVector(Rectangle escapee, Rectangle collider)
@@ -607,7 +621,7 @@ public class Dungeon
 		
 		int h = 0;
 		int v = 0;
-		
+		//Math.abs(ce.x - centerX) > Math.abs(cc.x - centerX)
 		if (Math.random() > .5)
 		{
 			h = (int) Math.ceil(hor);
@@ -640,6 +654,21 @@ public class Dungeon
 		}
 		
 		return null;
+	}
+	
+	private void center()
+	{
+		centerX = 0;
+		centerY = 0;
+		
+		for (Rectangle r : rooms)
+		{
+			centerX += r.x + (float)r.width / 2;
+			centerY += r.y + (float)r.height / 2;
+		}
+		
+		centerY /= rooms.size();
+		centerX /= rooms.size();
 	}
 	
 	private void adjustRooms()

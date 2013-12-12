@@ -1,7 +1,0 @@
-package map;
-
-public class OverworldEntity
-// e.g. the player, wandering bandits
-{
-
-}

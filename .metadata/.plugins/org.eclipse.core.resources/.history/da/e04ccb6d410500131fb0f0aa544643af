@@ -1,3 +1,0 @@
-package hero;
-
-public interface CombatSkill { }

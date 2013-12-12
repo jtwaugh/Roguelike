@@ -1,3 +1,0 @@
-package hero;
-
-enum GatheringSkills { Fishing, Mining, Woodcutting, Foraging, Hunting };

@@ -15,8 +15,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferStrategy;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import javax.swing.JFrame;
@@ -161,9 +163,20 @@ public class UnitTest extends Canvas
 		
 		Graphics2D gameRenderer = (Graphics2D) strategy.getDrawGraphics();
 		
+		ArrayList<Point2D.Float> pts = new ArrayList<Point2D.Float>();
+		pts.add(new Point2D.Float(0, 300));
+		pts.add(new Point2D.Float(200, 400));
+		pts.add(new Point2D.Float(300, 0));
+		pts.add(new Point2D.Float(300, 200));
+		pts.add(new Point2D.Float(500, 100));
+		pts.add(new Point2D.Float(500, 300));
+		pts.add(new Point2D.Float(600, 100));
+		
+		//d.delaunay.triangulate(pts, strategy);
+		
 		d.generateRooms();
 		d.drift(strategy);
-		//d.triangulate();
+		d.triangulate(strategy);
 		
 		for (Rectangle r : d.rooms)
 		{
@@ -194,6 +207,8 @@ public class UnitTest extends Canvas
 				gameRenderer.setColor(Color.BLACK);
 				gameRenderer.drawRect(x, y, r.width * 10, r.height * 10);
 			}
+			
+			//d.delaunay.render(strategy, gameRenderer, pts);
 			
 			gameRenderer.dispose();
 			strategy.show();
